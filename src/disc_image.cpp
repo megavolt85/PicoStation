@@ -529,7 +529,7 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
     size_t i;
 
     const int adjustedSector = sector - c_preGap;
-    if (adjustedSector < 5 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+    if (adjustedSector < 16 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
