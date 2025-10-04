@@ -19,12 +19,7 @@
 
 extern picostation::I2S m_i2s;
 uint32_t zone[ZONE_CNT] = 			{13500, 27000, 45000, 63000, 85500, 103500, 130500, 153000, 175500, 207000, 234000, 265500, 297000, 999999};
-uint32_t sect_per_track[ZONE_CNT] = { 	10,	   11,    12,    13,    14,     15,     16,     17,     18,     19,     20,     21,     22,     23};
-//const uint32_t zone[ZONE_CNT] = 			{10168, 21616, 34326, 48318, 63570, 80106, 97900, 116980, 137316, 158940, 181818, 205986, 231406, 258118, 286080, 999999};
-//const uint32_t sect_per_track[ZONE_CNT] =   {    9,    10,    11,    12,    13,    14,    15,     16,     17,     18,     19,     20,     21,     22,     23,     24};
-
-//inline uint32_t zone[ZONE_CNT] = 			{7805, 24642, 43136, 63300, 85109, 108576, 133716, 160499, 188939, 219056, 250812, 284226, 319319, 333005, 999999};
-//inline uint32_t sect_per_track[ZONE_CNT] = {   10,	  11,    12,    13,    14,     15,     16,     17,     18,     19,     20,     21,     22,     23,     24};
+uint32_t sect_per_track[ZONE_CNT] = {10,	   11,    12,    13,    14,     15,     16,     17,     18,     19,     20,     21,     22,     23};
 
 picostation::DriveMechanics picostation::g_driveMechanics;
 
@@ -103,7 +98,10 @@ void __time_critical_func(picostation::DriveMechanics::setSector)(uint32_t step,
         }
 	}
 	
-	DEBUG_PRINT("cur sec %d\n", m_sector);
+	skip_subq = m_sector;
+#ifdef DEBUG_CMD	
+	DEBUG_PRINT("set sector %d\n", m_sector-4500);
+#endif
 }
 
 bool __time_critical_func(picostation::DriveMechanics::servo_valid)()

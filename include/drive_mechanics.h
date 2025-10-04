@@ -22,21 +22,26 @@ class DriveMechanics {
 	
     void resetDrive()
     {
-		sled_work = 0;
+		sled_work = false;
 		m_sector = 0;
 		cur_track_counter = 0;
 		cur_zone = 0;
+		skip_subq = 0;
 	}
 
     bool isSledStopped() { return !sled_work; }
+    
+    uint32_t req_skip_subq() { return skip_subq; }
+    void clear_skip_subq() { skip_subq = 0; }
     
   private:
 	uint32_t cur_track_counter = 0;
     uint64_t m_sledTimer = 0;
     uint32_t m_sector = 0;
     uint8_t cur_zone = 0;
-	uint32_t c_MaxTrackMoveTime = 29;
+	uint32_t c_MaxTrackMoveTime = 45;
     bool sled_work = false;
+    uint32_t skip_subq = 0;
 };
 
 extern DriveMechanics g_driveMechanics;

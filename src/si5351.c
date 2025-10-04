@@ -104,7 +104,7 @@ int32_t si5351Correction;
  * It can be measured at lower frequencies and scaled linearly.
  * E.g. if you get 10_000_097 Hz instead of 10_000_000 Hz, `correction` is 97*10 = 970
  */
-bool si5351_Init(int32_t correction) {
+bool __time_critical_func(si5351_Init)(int32_t correction) {
     si5351Correction = correction;
 
     // Disable all outputs by setting CLKx_DIS high
@@ -131,7 +131,7 @@ bool si5351_Init(int32_t correction) {
 }
 
 // Sets the multiplier for given PLL
-void si5351_SetupPLL(si5351PLL_t pll, si5351PLLConfig_t* conf) {
+void __time_critical_func(si5351_SetupPLL)(si5351PLL_t pll, si5351PLLConfig_t* conf) {
     int32_t P1, P2, P3;
     int32_t mult = conf->mult;
     int32_t num = conf->num;
@@ -152,7 +152,7 @@ void si5351_SetupPLL(si5351PLL_t pll, si5351PLLConfig_t* conf) {
 
 // Configures PLL source, drive strength, multisynth divider, Rdivider and phaseOffset.
 // Returns 0 on success, != 0 otherwise.
-int si5351_SetupOutput(uint8_t output, si5351PLL_t pllSource, si5351DriveStrength_t driveStrength, si5351OutputConfig_t* conf, uint8_t phaseOffset) {
+int __time_critical_func(si5351_SetupOutput)(uint8_t output, si5351PLL_t pllSource, si5351DriveStrength_t driveStrength, si5351OutputConfig_t* conf, uint8_t phaseOffset) {
     int32_t div = conf->div;
     int32_t num = conf->num;
     int32_t denom = conf->denom;
@@ -222,7 +222,7 @@ int si5351_SetupOutput(uint8_t output, si5351PLL_t pllSource, si5351DriveStrengt
 
 // Calculates PLL, MS and RDiv settings for given Fclk in [8_000, 160_000_000] range.
 // The actual frequency will differ less than 6 Hz from given Fclk, assuming `correction` is right.
-void si5351_Calc(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig_t* out_conf) {
+void __time_critical_func(si5351_Calc)(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig_t* out_conf) {
     if(Fclk < 8000) Fclk = 8000;
     else if(Fclk > 160000000) Fclk = 160000000;
 
@@ -297,7 +297,7 @@ void si5351_Calc(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig_t
 // if 0 and (uint8_t)out_conf.div are passed as phaseOffset for these channels. Channels should
 // use the same PLL to make it work. Fclk can be from 1.4 MHz to 100 MHz. The actual frequency will
 // differ less than 4 Hz from given Fclk, assuming `correction` is right.
-void si5351_CalcIQ(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig_t* out_conf) {
+void __time_critical_func(si5351_CalcIQ)(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig_t* out_conf) {
     const int32_t Fxtal = 25000000;
     int32_t Fpll;
 
@@ -335,7 +335,7 @@ void si5351_CalcIQ(int32_t Fclk, si5351PLLConfig_t* pll_conf, si5351OutputConfig
 }
 
 // Setup CLK1 for given frequency and drive strength. Use PLLA.
-void si5351_SetupCLK1(int32_t Fclk, si5351DriveStrength_t driveStrength) {
+void __time_critical_func(si5351_SetupCLK1)(int32_t Fclk, si5351DriveStrength_t driveStrength) {
 	si5351PLLConfig_t pll_conf;
 	si5351OutputConfig_t out_conf;
 
@@ -345,7 +345,7 @@ void si5351_SetupCLK1(int32_t Fclk, si5351DriveStrength_t driveStrength) {
 }
 
 // Setup CLK2 for given frequency and drive strength. Use PLLB.
-void si5351_SetupCLK2(int32_t Fclk, si5351DriveStrength_t driveStrength) {
+void __time_critical_func(si5351_SetupCLK2)(int32_t Fclk, si5351DriveStrength_t driveStrength) {
 	si5351PLLConfig_t pll_conf;
 	si5351OutputConfig_t out_conf;
 
@@ -358,12 +358,12 @@ void si5351_SetupCLK2(int32_t Fclk, si5351DriveStrength_t driveStrength) {
 // Examples:
 // si5351_EnableOutputs(1 << 0) enables CLK0 and disables CLK1 and CLK2
 // si5351_EnableOutputs((1 << 2) | (1 << 0)) enables CLK0 and CLK2 and disables CLK1
-void si5351_EnableOutputs(uint8_t enabled) {
+void __time_critical_func(si5351_EnableOutputs)(uint8_t enabled) {
     si5351_write(SI5351_REGISTER_3_OUTPUT_ENABLE_CONTROL, ~enabled);
 }
 
 // Writes an 8 bit value of a register over I2C.
-int si5351_write(uint8_t reg, uint8_t value) {
+int __time_critical_func(si5351_write)(uint8_t reg, uint8_t value) {
 	uint8_t data[2] = {reg, value};
 	return i2c_write_blocking(I2C_HANDLE, SI5351_ADDRESS, data, 2, false);
     //i2c_write_blocking(I2C_HANDLE, SI5351_ADDRESS, &reg, 1, true);
@@ -379,7 +379,7 @@ int si5351_write(uint8_t reg, uint8_t value) {
 }
 
 // Common code for _SetupPLL and _SetupOutput
-void si5351_writeBulk(uint8_t baseaddr, int32_t P1, int32_t P2, int32_t P3, uint8_t divBy4, si5351RDiv_t rdiv) {
+void __time_critical_func(si5351_writeBulk)(uint8_t baseaddr, int32_t P1, int32_t P2, int32_t P3, uint8_t divBy4, si5351RDiv_t rdiv) {
     si5351_write(baseaddr,   (P3 >> 8) & 0xFF);
     si5351_write(baseaddr+1, P3 & 0xFF);
     si5351_write(baseaddr+2, ((P1 >> 16) & 0x3) | ((divBy4 & 0x3) << 2) | ((rdiv & 0x7) << 4));

@@ -101,12 +101,12 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 					break;
 
 				case ASEQ_CMD_1TRK_JUMP:
-					//DEBUG_PRINT("ASEQ 1TRK %c\n", command.aseq_cmd.dir ? '-' : '+');
+					DEBUG_PRINT("ASEQ 1TRK %c\n", command.aseq_cmd.dir ? '-' : '+');
 					g_driveMechanics.setSector(1, command.aseq_cmd.dir);
 					break;
 
 	            case ASEQ_CMD_2NTRK_JUMP:
-					//DEBUG_PRINT("ASEQ 2NTRK (%d) %c\n", m_jumpTrack << 1, command.aseq_cmd.dir ? '-' : '+');
+					DEBUG_PRINT("ASEQ 2NTRK (%d) %c\n", m_jumpTrack << 1, command.aseq_cmd.dir ? '-' : '+');
 	            	g_driveMechanics.setSector(m_jumpTrack << 1, command.aseq_cmd.dir);
 					break;
 			}
@@ -147,15 +147,15 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 				case CLV_MODE_STOP:
 					setSens(SENS::GFS, false);
 					m_i2s.i2s_set_state(0);
-					DEBUG_PRINT("T\n");
+					DEBUG_PRINT("Stop\n");
 					break;
 				
 				case CLV_MODE_BRAKE:
-					DEBUG_PRINT("B\n");
+					DEBUG_PRINT("Brake\n");
 					break;
 					
 				case CLV_MODE_KICK:
-					DEBUG_PRINT("K\n");
+					DEBUG_PRINT("Kick\n");
 					break;
 
 

@@ -20,7 +20,7 @@ class DiscImage {
         SDCard
     };
 
-    void buildSector(const int sector, uint32_t *buffer, uint16_t *userData, const uint16_t *scramling);
+    void buildSector(const int sector, uint32_t *buffer, uint16_t *userData, const uint16_t *scramling, bool pregap = false);
     FRESULT load(const TCHAR *targetCue);
     void unload();
     SubQ::Data generateSubQ(const int sector);

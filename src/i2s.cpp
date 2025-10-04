@@ -37,9 +37,8 @@ pseudoatomic<int> listReadyState;
 pseudoatomic<int> g_entryOffset;
 
 picostation::DiscImage::DataLocation s_dataLocation = picostation::DiscImage::DataLocation::RAM;
-static FATFS s_fatFS;
 
-static uint16_t *generateScramblingLUT()
+static uint16_t *__time_critical_func(generateScramblingLUT)()
 {
     static uint16_t ScramblingLUT[1176] = {0};
     int shift = 1;
@@ -72,16 +71,7 @@ static uint16_t *generateScramblingLUT()
     return ScramblingLUT;
 }
 
-void picostation::I2S::mountSDCard()
-{
-    FRESULT fr = f_mount(&s_fatFS, "", 1);
-    if (FR_OK != fr)
-    {
-        panic("f_mount error: (%d)\n", fr);
-    }
-}
-
-int picostation::I2S::initDMA(const volatile void *read_addr, unsigned int transfer_count)
+int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_addr, unsigned int transfer_count)
 {
     int channel = dma_claim_unused_channel(true);
     dma_channel_config c = dma_channel_get_default_config(channel);
@@ -99,6 +89,7 @@ int picostation::I2S::initDMA(const volatile void *read_addr, unsigned int trans
 {
     picostation::ModChip modChip;
     static uint32_t pioSamples[CACHED_SECS][1176];
+    static uint32_t pioDummy[1176];
     static uint16_t *cdScramblingLUT = generateScramblingLUT();
 
     static uint8_t bufferForDMA = 1;
@@ -133,13 +124,10 @@ int picostation::I2S::initDMA(const volatile void *read_addr, unsigned int trans
     uint64_t endTime;
 #endif
 
-	mountSDCard();
-
     g_discImage.makeDummyCue();
 	
     // this need to be moved to diskimage
     picostation::DirectoryListing::init();
-    picostation::DirectoryListing::gotoRoot();
     picostation::DirectoryListing::getDirectoryEntries(0);
 
     while (true)
@@ -238,7 +226,7 @@ int picostation::I2S::initDMA(const volatile void *read_addr, unsigned int trans
 		}
 		
         // Data sent via DMA, load the next sector
-        if (currentSector != lastSector && currentSector >= 4650 && currentSector < c_sectorMax-2)
+        if (currentSector != lastSector && currentSector >= 4648 && currentSector < c_sectorMax)
         {
 			if (!menu_active)
 			{
@@ -294,7 +282,7 @@ continue_transfer:
         // Start the next transfer if the DMA channel is not busy
         if (!dma_channel_is_busy(dmaChannel) && i2s_state)
         {
-			if (currentSector >= 4650 && currentSector < c_sectorMax-2)
+			if (currentSector >= 4648 && currentSector < c_sectorMax)
 			{
 				m_sectorSending = loadedSector[bufferForDMA];
 				m_lastSectorTime = time_us_64();
@@ -318,6 +306,26 @@ continue_transfer:
 			{
 				m_sectorSending = currentSector;
 				m_lastSectorTime = time_us_64();
+				
+				/*if (currentSector >= 4500 && s_dataLocation == picostation::DiscImage::DataLocation::SDCard)
+				{
+					g_discImage.buildSector(currentSector - 4500, pioDummy, NULL, cdScramblingLUT);
+					
+					dma_hw->ch[dmaChannel].read_addr = (uint32_t) pioDummy;
+
+					// Sync with the I2S clock
+					while (gpio_get(Pin::LRCK) == 1)
+					{
+						tight_loop_contents();
+					}
+					
+					while (gpio_get(Pin::LRCK) == 0)
+					{
+						tight_loop_contents();
+					}
+
+					dma_channel_start(dmaChannel);
+				}*/
 			}
         }
     }

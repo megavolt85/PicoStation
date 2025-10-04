@@ -165,11 +165,11 @@ static void __time_critical_func(mech_irq_hnd)()
 	pio_interrupt_clear(PIOInstance::MECHACON, 0);
 }
 
-static void __time_critical_func(send_subq)(const int currentSector)
+static void __time_critical_func(send_subq)(const int Sector)
 {
 	picostation::SubQ subq(&picostation::g_discImage);
 	
-	subq.start_subq(currentSector);
+	subq.start_subq(Sector);
 	picostation::g_subqDelay = false;
 }
 
@@ -237,7 +237,7 @@ static void __time_critical_func(send_subq)(const int currentSector)
     __builtin_unreachable();
 }
 
-void picostation::initHW()
+void __time_critical_func(picostation::initHW)()
 {
 #if DEBUG_LOGGING_ENABLED
 	stdio_init_all();
@@ -350,7 +350,7 @@ void picostation::initHW()
     DEBUG_PRINT("ON!\n");
 }
 
-static void initPWM(picostation::PWMSettings *settings)
+static void __time_critical_func(initPWM)(picostation::PWMSettings *settings)
 {
     gpio_set_function(settings->gpio, GPIO_FUNC_PWM);
     settings->sliceNum = pwm_gpio_to_slice_num(settings->gpio);

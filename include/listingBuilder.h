@@ -14,7 +14,7 @@ class listingBuilder {
     bool addString(const char* value, uint8_t flags) {
         uint8_t pathLen = strnlen(value, 255);
         
-        if (!flags) { // is .cue, remove extension
+        if (!flags && pathLen > 3) { // is .cue, remove extension
 			pathLen -= 4;
 		}
         

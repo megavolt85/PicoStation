@@ -114,7 +114,7 @@ static void __time_critical_func(getParentPath)(const TCHAR *path, TCHAR *parent
     }
 }
 
-void __time_critical_func(picostation::DiscImage::buildSector)(const int sector, uint32_t *buffer, uint16_t *userData, const uint16_t *scramling)
+void __time_critical_func(picostation::DiscImage::buildSector)(const int sector, uint32_t *buffer, uint16_t *userData, const uint16_t *scramling, bool pregap)
 {
 	uint32_t tmp;
 	static uint8_t header[24] =
@@ -133,7 +133,14 @@ void __time_critical_func(picostation::DiscImage::buildSector)(const int sector,
 	header[13] = toBCD(msf.ss);
 	header[14] = toBCD(msf.ff);
 	
-	header[18] = (Submode::Form);
+	if (pregap)
+	{
+		header[18] = header[22] = (Submode::Data);
+	}
+	else
+	{
+		header[18] = (Submode::Form);
+	}
 	
 	uint16_t *src = (uint16_t *) header;
 	
@@ -223,8 +230,7 @@ picostation::SubQ::Data __time_critical_func(picostation::DiscImage::generateSub
         else if (point == m_cueDisc.trackCount + 2)  // A1 - Report last track number
         {
             // Thanks rama! )
-            subqdata.ctrladdr =
-                m_cueDisc.tracks[m_cueDisc.trackCount].trackType == CueTrackType::TRACK_TYPE_DATA ? 0x41 : 0x01;
+            subqdata.ctrladdr = m_cueDisc.tracks[m_cueDisc.trackCount].trackType == CueTrackType::TRACK_TYPE_DATA ? 0x41 : 0x01;
             subqdata.tno = 0x00;
             subqdata.point = 0xA1;
             subqdata.pmin = toBCD(m_cueDisc.trackCount);
@@ -236,8 +242,7 @@ picostation::SubQ::Data __time_critical_func(picostation::DiscImage::generateSub
             // <3
             const int sector_lead_out = m_cueDisc.tracks[m_cueDisc.trackCount + 1].indices[1] + c_preGap;
             const MSF msf_lead_out = sectorToMSF(sector_lead_out);
-            subqdata.ctrladdr =
-                m_cueDisc.tracks[m_cueDisc.trackCount].trackType == CueTrackType::TRACK_TYPE_DATA ? 0x41 : 0x01;
+            subqdata.ctrladdr = m_cueDisc.tracks[m_cueDisc.trackCount].trackType == CueTrackType::TRACK_TYPE_DATA ? 0x41 : 0x01;
             subqdata.tno = 0x00;
             subqdata.point = 0xA2;
             subqdata.pmin = toBCD(msf_lead_out.mm);
@@ -276,8 +281,7 @@ picostation::SubQ::Data __time_critical_func(picostation::DiscImage::generateSub
         const int sector_abs = (sector - c_leadIn);
         const MSF msf_abs = sectorToMSF(sector_abs);
 
-        subqdata.ctrladdr =
-            (m_cueDisc.tracks[m_currentLogicalTrack].trackType == CueTrackType::TRACK_TYPE_DATA) ? 0x41 : 0x01;
+        subqdata.ctrladdr = (m_cueDisc.tracks[m_currentLogicalTrack].trackType == CueTrackType::TRACK_TYPE_DATA) ? 0x41 : 0x01;
 
         if (m_currentLogicalTrack == m_cueDisc.trackCount + 1)
         {
@@ -407,8 +411,7 @@ FRESULT __time_critical_func(picostation::DiscImage::load)(const TCHAR *targetCu
     DEBUG_PRINT("Disc track count: %d\n", m_cueDisc.trackCount);
 
     // Lead-out
-    m_cueDisc.tracks[m_cueDisc.trackCount + 1].fileOffset =
-        m_cueDisc.tracks[m_cueDisc.trackCount].indices[1] + m_cueDisc.tracks[m_cueDisc.trackCount].size;
+    m_cueDisc.tracks[m_cueDisc.trackCount + 1].fileOffset = m_cueDisc.tracks[m_cueDisc.trackCount].indices[1] + m_cueDisc.tracks[m_cueDisc.trackCount].size;
     m_cueDisc.tracks[m_cueDisc.trackCount + 1].indices[0] = m_cueDisc.tracks[m_cueDisc.trackCount + 1].fileOffset;
     m_cueDisc.tracks[m_cueDisc.trackCount + 1].indices[1] = m_cueDisc.tracks[m_cueDisc.trackCount + 1].indices[0];
 
@@ -529,10 +532,15 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
     size_t i;
 
     const int adjustedSector = sector - c_preGap;
-    if (adjustedSector < 16 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+    if (adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
+	}
+    
+    if (adjustedSector < 0)
+	{
+		goto is_pregap;
 	}
     
     for (i = 1; i <= m_cueDisc.trackCount; i++)
@@ -554,13 +562,10 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
 
                 fr = f_read_scramble((FIL *)m_cueDisc.tracks[i].file->opaque, buffer, c_cdSamplesBytes, &br, 
 									 scramling, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA);
-                //static uint16_t tmpbuf[1176];
-                //fr = f_read((FIL *)m_cueDisc.tracks[i].file->opaque, tmpbuf, 2352, &br);
                 if (FR_OK != fr)
                 {
                     DEBUG_PRINT("f_read error: (%d)\n",  fr);
                 }
-                //scramble_data((uint32_t *) buffer, tmpbuf, isCurrentTrackData() ? scramling : NULL, 1176);
                 break;
             }
         }
@@ -568,9 +573,9 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
     
     if (i > m_cueDisc.trackCount)
 	{
-		DEBUG_PRINT("out of range image sec (%d)\n", adjustedSector);
-		memset(s_userData, 0, c_cdSamplesBytes);
-		buildSector(sector, static_cast<uint32_t *>(buffer), (uint16_t *) s_userData, scramling);
+is_pregap:
+		//DEBUG_PRINT("out of range image sec (%d)\n", adjustedSector);
+		buildSector(sector, static_cast<uint32_t *>(buffer), NULL, scramling, true);
 	}
     else if (br < c_cdSamplesBytes)
     {
