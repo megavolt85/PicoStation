@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "directory_listing.h"
 
 #include <stddef.h>
@@ -139,7 +140,7 @@ bool __time_critical_func(DirectoryListing::getDirectoryEntries)(const uint32_t 
         
         while (true)
         {
-            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strstr(currentEntry.fname, ".cue")))
+            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strcasestr(currentEntry.fname, ".cue")))
             {
                 if (filesProcessed >= offset)
                 {
@@ -228,7 +229,7 @@ uint16_t __time_critical_func(DirectoryListing::getDirectoryEntriesCount)()
         
         while (true)
         {
-            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strstr(currentEntry.fname, ".cue")))
+            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strcasestr(currentEntry.fname, ".cue")))
             {
 				fileEntryCount++;
 				
@@ -303,7 +304,7 @@ bool __time_critical_func(DirectoryListing::getDirectoryEntry)(const uint32_t in
         
         while (true)
         {
-            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strstr(currentEntry.fname, ".cue")))
+            if (!(currentEntry.fattrib & AM_HID) && (currentEntry.fattrib & AM_DIR || strcasestr(currentEntry.fname, ".cue")))
             {
                 if (filesProcessed == index)
                 {
