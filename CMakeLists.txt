@@ -100,6 +100,7 @@ target_sources(
     src/cmd.cpp
     src/disc_image.cpp
     src/drive_mechanics.cpp
+    src/edc.c
     src/i2s.cpp
     src/main.cpp
     src/modchip.cpp

@@ -2,6 +2,7 @@
 #include "hardware/vreg.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
+#include "edc.h"
 #include "picostation.h"
 #include "pseudo_atomics.h"
 #include <cstdio>
@@ -16,6 +17,7 @@ int main() {
     set_sys_clock_khz(271200, true);
 
     initPseudoAtomics();
+    eccedc_init();
 
     picostation::initHW();
     multicore_launch_core1(picostation::core1Entry);  // I2S Thread
