@@ -528,12 +528,13 @@ void __time_critical_func(picostation::DiscImage::readSectorRAM)(void *buffer, c
 
 void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, const int sector, const uint16_t *scramling)
 {
-    FRESULT fr;
-    UINT br = 0;
-    size_t i;
+	FRESULT fr;
+	UINT br = 0;
+	size_t i;
 
-    const int adjustedSector = sector - c_preGap;    
-    if (adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+	const int adjustedSector = sector - c_preGap;    
+	
+	if (adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
@@ -541,7 +542,15 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
     
     if (adjustedSector < 0)
 	{
-		goto is_pregap;
+		if (m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+		{
+			goto is_pregap;
+		}
+		else
+		{
+			memset(buffer, 0, 1176*4);
+			return;
+		}
 	}
     
     for (i = 1; i <= m_cueDisc.trackCount; i++)

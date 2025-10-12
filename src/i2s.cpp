@@ -226,7 +226,7 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 		}
 		
         // Data sent via DMA, load the next sector
-        if (currentSector != lastSector && currentSector >= 4648 && currentSector < c_sectorMax)
+        if (currentSector != lastSector && currentSector >= 4503 && currentSector < c_sectorMax)
         {
 			if (!menu_active)
 			{
@@ -282,7 +282,7 @@ continue_transfer:
         // Start the next transfer if the DMA channel is not busy
         if (!dma_channel_is_busy(dmaChannel) && i2s_state)
         {
-			if (currentSector >= 4648 && currentSector < c_sectorMax)
+			if (currentSector >= 4503 && currentSector < c_sectorMax)
 			{
 				m_sectorSending = loadedSector[bufferForDMA];
 				m_lastSectorTime = time_us_64();
@@ -306,26 +306,6 @@ continue_transfer:
 			{
 				m_sectorSending = currentSector;
 				m_lastSectorTime = time_us_64();
-				
-				/*if (currentSector >= 4500 && s_dataLocation == picostation::DiscImage::DataLocation::SDCard)
-				{
-					g_discImage.buildSector(currentSector - 4500, pioDummy, NULL, cdScramblingLUT);
-					
-					dma_hw->ch[dmaChannel].read_addr = (uint32_t) pioDummy;
-
-					// Sync with the I2S clock
-					while (gpio_get(Pin::LRCK) == 1)
-					{
-						tight_loop_contents();
-					}
-					
-					while (gpio_get(Pin::LRCK) == 0)
-					{
-						tight_loop_contents();
-					}
-
-					dma_channel_start(dmaChannel);
-				}*/
 			}
         }
     }

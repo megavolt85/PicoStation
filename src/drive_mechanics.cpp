@@ -14,12 +14,12 @@
 #define DEBUG_PRINT(...) while (0)
 #endif
 
-#define ZONE_CNT 	14
+#define ZONE_CNT 	16
 #define ZONE_MAX 	ZONE_CNT-1
 
 extern picostation::I2S m_i2s;
-uint32_t zone[ZONE_CNT] = 			{13500, 27000, 45000, 63000, 85500, 103500, 130500, 153000, 175500, 207000, 234000, 265500, 297000, 999999};
-uint32_t sect_per_track[ZONE_CNT] = {10,	   11,    12,    13,    14,     15,     16,     17,     18,     19,     20,     21,     22,     23};
+uint32_t zone[ZONE_CNT] = 			{4500, 7750, 13500, 27000, 45000, 63000, 85500, 103500, 130500, 153000, 175500, 207000, 234000, 265500, 297000, 999999};
+uint32_t sect_per_track[ZONE_CNT] = {	8,    9,    10,    11,    12,    13,    14,     15,     16,     17,     18,     19,     20,     21,     22,     23};
 
 picostation::DriveMechanics picostation::g_driveMechanics;
 
