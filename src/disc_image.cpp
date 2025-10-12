@@ -13,6 +13,7 @@
 #include "third_party/posix_file.h"
 #include "values.h"
 #include "global.h"
+#include "edc.h"
 
 #if DEBUG_CUE
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
@@ -291,7 +292,7 @@ picostation::SubQ::Data __time_critical_func(picostation::DiscImage::generateSub
         {
             subqdata.tno = toBCD(m_currentLogicalTrack);  // Track numbers
         }
-        
+
         if (sector_track < 0)					   // 2 sec pause track
         {
             subqdata.x = 0x00;                     // Pause encoding
@@ -531,7 +532,7 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
     UINT br = 0;
     size_t i;
 
-    const int adjustedSector = sector - c_preGap;
+    const int adjustedSector = sector - c_preGap;    
     if (adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
@@ -560,12 +561,27 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
                     }
                 }
 
-                fr = f_read_scramble((FIL *)m_cueDisc.tracks[i].file->opaque, buffer, c_cdSamplesBytes, &br, 
-									 scramling, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA);
+                // fr = f_read_scramble((FIL *)m_cueDisc.tracks[i].file->opaque, buffer, c_cdSamplesBytes, &br, 
+				// 					 scramling, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA);
+                // if (FR_OK != fr)
+                // {
+                //     DEBUG_PRINT("f_read error: (%d)\n",  fr);
+                // }
+
+                static uint16_t tmpbuf[c_cdSamplesBytes/2];
+                fr = f_read((FIL *)m_cueDisc.tracks[i].file->opaque, tmpbuf, c_cdSamplesBytes, &br);
                 if (FR_OK != fr)
                 {
                     DEBUG_PRINT("f_read error: (%d)\n",  fr);
                 }
+                
+                uint8_t *tmpbufData = (uint8_t *)tmpbuf;
+                if (!audio_guess(tmpbufData))
+                {
+                    eccedc_generate(tmpbufData);
+                }
+                
+                scramble_data((uint32_t *) buffer, tmpbuf, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA ? scramling : NULL, c_cdSamplesBytes/2);
                 break;
             }
         }
