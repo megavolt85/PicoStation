@@ -39,7 +39,7 @@ class DriveMechanics {
     uint64_t m_sledTimer = 0;
     uint32_t m_sector = 0;
     uint8_t cur_zone = 0;
-	uint32_t c_MaxTrackMoveTime = 45;
+	uint32_t c_MaxTrackMoveTime = 29;
     bool sled_work = false;
     uint32_t skip_subq = 0;
 };
