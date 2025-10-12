@@ -2,8 +2,6 @@
 #include "pico/time.h"
 #include <string.h>
 
-int optional_form2_edc_calculated = 1;
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // LUTs for computing ECC/EDC
@@ -13,7 +11,7 @@ static uint8_t ecc_b_lut[256];
 static uint32_t edc_lut[256];
 static int eccedc_initialized = 0;
 
-void eccedc_init(void) {
+void __time_critical_func(eccedc_init)(void) {
     if (eccedc_initialized == 0) {
         eccedc_initialized = 1;
 
@@ -31,7 +29,7 @@ void eccedc_init(void) {
     }
 }
 
-static void set32lsb(uint8_t* p, uint32_t value) {
+inline void set32lsb(uint8_t* p, uint32_t value) {
     p[0] = (uint8_t)(value >> 0);
     p[1] = (uint8_t)(value >> 8);
     p[2] = (uint8_t)(value >> 16);
@@ -42,7 +40,7 @@ static void set32lsb(uint8_t* p, uint32_t value) {
 //
 // Compute EDC for a block
 //
-void edc_computeblock(const uint8_t* src, size_t size, uint8_t* dest) {
+void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uint8_t* dest) {
     uint32_t edc = 0;
     while (size--) {
         edc = (edc >> 8) ^ edc_lut[(edc ^ (*src++)) & 0xFF];
@@ -79,7 +77,7 @@ static void __time_critical_func(ecc_computeblock)(uint8_t* src, uint32_t major_
 //
 // Generate ECC P and Q codes for a block
 //
-static void ecc_generate(uint8_t* sector, int zeroaddress) {
+static void __time_critical_func(ecc_generate)(uint8_t* sector, int zeroaddress) {
     uint8_t saved_address[4];
     //
     // Save the address and zero it out, if necessary
@@ -166,11 +164,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 2: Compute EDC
                 //
-                if (optional_form2_edc_calculated == 0) {
-                    *(uint32_t*)(sector + 0x92C) = 0;
-                } else {
-                    edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
-                }
+				edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
             }
             break;
     }
@@ -180,6 +174,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
 //
 // Returns nonzero if any bytes in the array are nonzero
 //
+/*
 static int anynonzero(const uint8_t* data, size_t len) {
     for (; len; len--) {
         if (*data++) {
@@ -188,12 +183,13 @@ static int anynonzero(const uint8_t* data, size_t len) {
     }
     return 0;
 }
-
+*/
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Verify EDC for a sector (must be 2352 = 0x930 bytes)
 // Returns 0 on success
 //
+/*
 static int edc_verify(const uint8_t* sector) {
     uint8_t myedc[4];
     //
@@ -245,7 +241,8 @@ static int edc_verify(const uint8_t* sector) {
     //
     return 1;
 }
-
+*/
+/*
 int __time_critical_func(audio_guess)(const uint8_t* sector)  // 1: looks like audio 0: normal
 {
     if ((!memcmp(sector, sync_header, sizeof(sync_header))) && (*(sector + 0xD) < 0x60) && (*(sector + 0xE) < 0x75) &&
@@ -254,3 +251,4 @@ int __time_critical_func(audio_guess)(const uint8_t* sector)  // 1: looks like a
     }
     return 1;
 }
+*/

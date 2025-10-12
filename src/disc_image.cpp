@@ -71,7 +71,7 @@ static constexpr uint16_t crc16_lut[256] =
     0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
 };
 
-static uint8_t s_userData[c_cdSamplesBytes] = {0};
+static uint16_t s_userData[c_cdSamplesBytes/2] = {0};
 
 static MSF __time_critical_func(sectorToMSF)(const int sector)
 {
@@ -522,7 +522,7 @@ void __time_critical_func(picostation::DiscImage::readSectorRAM)(void *buffer, c
     } 
     else
     {
-        buildSector(sector, static_cast<uint32_t *>(buffer), (uint16_t *) s_userData, scramling);
+        buildSector(sector, static_cast<uint32_t *>(buffer), s_userData, scramling);
     }
 }
 
@@ -534,7 +534,7 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
 
 	const int adjustedSector = sector - c_preGap;    
 	
-	if (adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+	if (!skip_bootsector && adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
@@ -570,27 +570,28 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
                     }
                 }
 
-                // fr = f_read_scramble((FIL *)m_cueDisc.tracks[i].file->opaque, buffer, c_cdSamplesBytes, &br, 
-				// 					 scramling, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA);
-                // if (FR_OK != fr)
-                // {
-                //     DEBUG_PRINT("f_read error: (%d)\n",  fr);
-                // }
-
-                static uint16_t tmpbuf[c_cdSamplesBytes/2];
-                fr = f_read((FIL *)m_cueDisc.tracks[i].file->opaque, tmpbuf, c_cdSamplesBytes, &br);
-                if (FR_OK != fr)
-                {
-                    DEBUG_PRINT("f_read error: (%d)\n",  fr);
+				if (skip_edc || m_cueDisc.tracks[i].trackType != CueTrackType::TRACK_TYPE_DATA)
+				{
+					fr = f_read_scramble((FIL *)m_cueDisc.tracks[i].file->opaque, buffer, c_cdSamplesBytes, &br, 
+										scramling, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA);
+					
+					if (FR_OK != fr)
+					{
+						DEBUG_PRINT("f_read error: (%d)\n",  fr);
+					}
+				}
+				else
+				{
+					fr = f_read((FIL *)m_cueDisc.tracks[i].file->opaque, s_userData, c_cdSamplesBytes, &br);
+					if (FR_OK != fr)
+					{
+						DEBUG_PRINT("f_read error: (%d)\n",  fr);
+					}
+					
+					eccedc_generate((uint8_t *) s_userData);
+					
+					scramble_data((uint32_t *) buffer, s_userData, scramling, c_cdSamplesBytes/2);
                 }
-                
-                uint8_t *tmpbufData = (uint8_t *)tmpbuf;
-                if (!audio_guess(tmpbufData))
-                {
-                    eccedc_generate(tmpbufData);
-                }
-                
-                scramble_data((uint32_t *) buffer, tmpbuf, m_cueDisc.tracks[i].trackType == CueTrackType::TRACK_TYPE_DATA ? scramling : NULL, c_cdSamplesBytes/2);
                 break;
             }
         }
@@ -605,8 +606,6 @@ is_pregap:
     else if (br < c_cdSamplesBytes)
     {
 		DEBUG_PRINT("readed %llu of 2352\n", br);
-        //buildSector(sector, static_cast<uint8_t *>(buffer), s_userData);
-        //br = c_cdSamplesBytes;
     }
 }
 

@@ -404,6 +404,8 @@ void __time_critical_func(picostation::reset)()
 			g_discImage.unload();
 			g_discImage.makeDummyCue();
 			m_i2s.menu_active = true;
+			g_discImage.set_skip_bootsector(false);
+			g_discImage.set_skip_edc(false);
 		}
 		picostation::DirectoryListing::gotoRoot();
 		s_dataLocation = picostation::DiscImage::DataLocation::RAM;

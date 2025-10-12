@@ -70,7 +70,7 @@ class MechCommand {
 		CLV_MODE_CLVP  = 0xF,
 		CLV_MODE_CLVA  = 0x6,
 	};
-	
+
 	enum CUSTOM_CMD
 	{
 		COMMAND_NONE = 0x0,
@@ -81,7 +81,14 @@ class MechCommand {
 		COMMAND_MOUNT_FILE = 0x5,
 		COMMAND_IO_COMMAND = 0x6,
 		COMMAND_IO_DATA = 0x7,
+		COMMAND_EXTENDED = 0x8,
 		COMMAND_BOOTLOADER = 0xA
+	};
+
+	enum EXTENDED_CMD
+	{
+		EXTENDED_SKIP_BOOTSECTOR = 1,
+		EXTENDED_SKIP_EDC = 2
 	};
 
 	typedef union mech_cmd_t

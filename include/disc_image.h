@@ -29,11 +29,15 @@ class DiscImage {
     void readSector(void *buffer, const int sector, DataLocation location, const uint16_t *scramling);
     void readSectorRAM(void *buffer, const int sector, const uint16_t *scramling);
     void readSectorSD(void *buffer, const int sector, const uint16_t *scramling);
+    void set_skip_bootsector(bool skip) { skip_bootsector =  skip; }
+	void set_skip_edc(bool skip) { skip_edc =  skip; }
 
   private:
     CueDisc m_cueDisc;
     bool m_hasData = false;
     int m_currentLogicalTrack = 0;
+    bool skip_bootsector = false;
+    bool skip_edc = false;
 };
 
 extern DiscImage g_discImage;

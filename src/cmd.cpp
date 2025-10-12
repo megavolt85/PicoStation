@@ -244,6 +244,24 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 					break;
 				}
 				
+				case COMMAND_EXTENDED:
+				{
+					switch (command.custom_cmd.arg >> 1)
+					{
+						case EXTENDED_SKIP_BOOTSECTOR:
+							g_discImage.set_skip_bootsector(command.custom_cmd.arg & 1);
+							break;
+						
+						case EXTENDED_SKIP_EDC:
+							g_discImage.set_skip_edc(command.custom_cmd.arg & 1);
+							break;
+						
+						default:
+							break;
+					}
+					break;
+				}
+				
 				default:
 					break;
 			}
