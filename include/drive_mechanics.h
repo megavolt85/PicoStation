@@ -15,19 +15,19 @@ class DriveMechanics {
     void setSector(uint32_t step, bool rev);
     int getSector() { return m_sector; }
     void moveSled(MechCommand &mechCommand);
-	bool servo_valid();
-	void startSled();
-	void stopSled() { sled_work = 0; }
-	uint32_t get_track_count() { return cur_track_counter;}
+    bool servo_valid();
+    void startSled();
+    void stopSled() { sled_work = false; }
+    uint32_t get_track_count() { return cur_track_counter;}
 	
     void resetDrive()
     {
-		sled_work = false;
-		m_sector = 0;
-		cur_track_counter = 0;
-		cur_zone = 0;
-		skip_subq = 0;
-	}
+      sled_work = false;
+      m_sector = 0;
+      cur_track_counter = 0;
+      cur_zone = 0;
+      skip_subq = 0;
+    }
 
     bool isSledStopped() { return !sled_work; }
     
@@ -39,7 +39,7 @@ class DriveMechanics {
     uint64_t m_sledTimer = 0;
     uint32_t m_sector = 0;
     uint8_t cur_zone = 0;
-	uint32_t c_MaxTrackMoveTime = 29;
+    uint32_t c_MaxTrackMoveTime = 29;
     bool sled_work = false;
     uint32_t skip_subq = 0;
 };

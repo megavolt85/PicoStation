@@ -126,7 +126,7 @@ void __time_critical_func(picostation::DriveMechanics::moveSled)(picostation::Me
 
 void __time_critical_func(picostation::DriveMechanics::startSled)()
 {
-	sled_work = 1;
+	sled_work = true;
 	cur_track_counter = 0;
 	m_sledTimer = time_us_64();
 }

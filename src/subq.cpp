@@ -29,12 +29,6 @@ void __time_critical_func(picostation::SubQ::start_subq)(const int sector)
     const SubQ::Data tracksubq = m_discImage->generateSubQ(sector);
     
     gpio_put(Pin::SCOR, 1);
-	
-	add_alarm_in_us( 135,
-					[](alarm_id_t id, void *user_data) -> int64_t {
-						gpio_put(Pin::SCOR, 0);
-						return 0;
-					}, NULL, true);
     
     subq_program_init(PIOInstance::SUBQ, SM::SUBQ, g_subqOffset, Pin::SQSO, Pin::SQCK);
     pio_sm_clear_fifos(PIOInstance::SUBQ, SM::SUBQ);
@@ -47,6 +41,8 @@ void __time_critical_func(picostation::SubQ::start_subq)(const int sector)
     pio_sm_put_blocking(PIOInstance::SUBQ, SM::SUBQ, sub[0]);
     pio_sm_put_blocking(PIOInstance::SUBQ, SM::SUBQ, sub[1]);
     pio_sm_put_blocking(PIOInstance::SUBQ, SM::SUBQ, sub[2]);
+
+    gpio_put(Pin::SCOR, 0);
     
 #if DEBUG_SUBQ
 	const uint8_t *d = tracksubq.raw;
