@@ -17,8 +17,12 @@ class MechCommand {
     void setSoct(const bool new_value);
     void processLatchedCommand();
     void updateMech();
-
     void resetXBUSY();
+	void setCLVModeStopKickPattern(const uint8_t clv_mode);
+	uint8_t getCLVModeStopKickPattern() { return m_clvModeStopKickPattern; }
+	void resetCLVModeStopKickPattern() { m_clvModeStopKickPattern = 0; }	
+	void setFirstClvModeStopKickPattern(bool value) { m_firstClvModeStopKickPattern = value; }
+	bool isCLVModeStopKickPattern();
 
   private:
 	enum MECH_COMMAND
@@ -170,6 +174,8 @@ class MechCommand {
 
     int m_jumpTrack = 0;
     uint32_t m_latched = 0;  // Command latch
+	uint8_t m_clvModeStopKickPattern = 0;
+	bool m_firstClvModeStopKickPattern = true;
 
     size_t m_currentSens = 0;
     bool m_sensData[16] =
