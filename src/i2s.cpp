@@ -190,6 +190,8 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					menu_active = false;
 					reinitI2S();
 					g_driveMechanics.resetDrive();
+					mechCommand.setFirstClvModeStopKickPattern(true);
+
 					continue;
 					break;
 				}

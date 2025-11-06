@@ -219,8 +219,8 @@ static void __time_critical_func(send_subq)(const int Sector)
             {
                 g_driveMechanics.moveToNextSector();
                 g_subqDelay = true;
-                
-                add_alarm_in_us( time_us_64() - m_i2s.getLastSectorTime() + c_MaxSubqDelayTime,
+
+                add_alarm_in_us(6667,
 					[](alarm_id_t id, void *user_data) -> int64_t {
 						send_subq((const int) user_data);
 						return 0;
@@ -406,6 +406,7 @@ void __time_critical_func(picostation::reset)()
 			m_i2s.menu_active = true;
 			g_discImage.set_skip_bootsector(false);
 			g_discImage.set_skip_edc(false);
+            m_mechCommand.setFirstClvModeStopKickPattern(true);
 		}
 		picostation::DirectoryListing::gotoRoot();
 		s_dataLocation = picostation::DiscImage::DataLocation::RAM;
@@ -419,6 +420,7 @@ void __time_critical_func(picostation::reset)()
     gpio_put(Pin::SQSO, 0);
 	g_driveMechanics.resetDrive();
 	m_i2s.reinitI2S();
+    m_mechCommand.setFirstClvModeStopKickPattern(true);
 	
 	uint64_t startTime = time_us_64();
 	
