@@ -191,6 +191,7 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					reinitI2S();
 					g_driveMechanics.resetDrive();
 					mechCommand.setFirstClvModeStopKickPattern(true);
+					g_discImage.set_skip_bootsector(false);
 					mechCommand.resetBootSectorPattern();
 
 					continue;
@@ -226,7 +227,6 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 			
 			reinitI2S();
 			g_driveMechanics.resetDrive();
-			mechCommand.resetBootSectorPattern();
 		}
 		
         // Data sent via DMA, load the next sector

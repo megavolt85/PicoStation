@@ -429,7 +429,6 @@ FRESULT __time_critical_func(picostation::DiscImage::load)(const TCHAR *targetCu
     }
     
     c_sectorMax = m_cueDisc.tracks[m_cueDisc.trackCount+1].indices[0] + 4652;
-    set_skip_bootsector(false);
     
     return FR_OK;
 }
@@ -454,8 +453,7 @@ void __time_critical_func(picostation::DiscImage::unload)()
 				m_cueDisc.tracks[i].file->close(m_cueDisc.tracks[i].file, NULL, NULL);
 			}
 		}
-	}
-    set_skip_bootsector(false);
+	}    
 }
 
 void __time_critical_func(picostation::DiscImage::makeDummyCue)()

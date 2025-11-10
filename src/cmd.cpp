@@ -342,11 +342,7 @@ void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8
 		static int current_dspb = -1;
 		if (current_dspb != dspb || dspb == 10)
 		{
-			if (dspb != 10)
-			{
-				current_dspb = dspb;
-			}
-
+			current_dspb = dspb;
 			switch (dspb)
 			{
 			case 10:
