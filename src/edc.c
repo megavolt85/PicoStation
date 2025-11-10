@@ -40,12 +40,22 @@ inline void set32lsb(uint8_t* p, uint32_t value) {
 //
 // Compute EDC for a block
 //
-void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uint8_t* dest) {
+void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uint8_t* dest, uint8_t mode) {
     uint32_t edc = 0;
+    bool all_zero = true;
+    size_t index = 0;
+    
     while (size--) {
-        edc = (edc >> 8) ^ edc_lut[(edc ^ (*src++)) & 0xFF];
+        uint8_t val = *src++;
+
+        // Skip the first 8 bytes of the subheader
+        if (mode == 2 && index >= 8 && val != 0) all_zero = false;
+        edc = (edc >> 8) ^ edc_lut[(edc ^ val) & 0xFF];
+        index++;
     }
-    set32lsb(dest, edc);
+    
+    if (!all_zero)
+        set32lsb(dest, edc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +141,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
             //
             // Compute EDC
             //
-            edc_computeblock(sector + 0x00, 0x810, sector + 0x810);
+            edc_computeblock(sector + 0x00, 0x810, sector + 0x810, sector[0x0F]);
             //
             // Zero out reserved area
             //
@@ -154,7 +164,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 1: Compute EDC
                 //
-                edc_computeblock(sector + 0x10, 0x808, sector + 0x818);
+                edc_computeblock(sector + 0x10, 0x808, sector + 0x818, sector[0x0F]);
                 //
                 // Generate ECC P/Q codes
                 //
@@ -164,7 +174,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 2: Compute EDC
                 //
-				edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
+				edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C, sector[0x0F]);
             }
             break;
     }
