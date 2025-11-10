@@ -429,6 +429,7 @@ FRESULT __time_critical_func(picostation::DiscImage::load)(const TCHAR *targetCu
     }
     
     c_sectorMax = m_cueDisc.tracks[m_cueDisc.trackCount+1].indices[0] + 4652;
+    set_skip_bootsector(false);
     
     return FR_OK;
 }
@@ -454,6 +455,7 @@ void __time_critical_func(picostation::DiscImage::unload)()
 			}
 		}
 	}
+    set_skip_bootsector(false);
 }
 
 void __time_critical_func(picostation::DiscImage::makeDummyCue)()
@@ -532,14 +534,14 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
 	UINT br = 0;
 	size_t i;
 
-	const int adjustedSector = sector - c_preGap;    
-	
-	if (!skip_bootsector && adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+	const int adjustedSector = sector - c_preGap;
+    
+    if (!skip_bootsector && adjustedSector >= 0 && adjustedSector < 5 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
 	}
-    
+
     if (adjustedSector < 0)
 	{
 		if (m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)

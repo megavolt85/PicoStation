@@ -269,6 +269,12 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 		}
 		
 		default:
+		{
+			if (command.cmd.id != 0x1 && command.cmd.id != 0x3 && command.cmd.id != 0x5 && command.cmd.id != 0x6)
+			{
+				setBootSectorPattern(command.cmd.id);
+			}
+		}
 			break;
 	}
 }
@@ -327,7 +333,47 @@ bool __time_critical_func(picostation::MechCommand::isCLVModeStopKickPattern)()
 	}
 
 	return false;
-};
+}
+
+void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8_t dspb)
+{
+	if (!isBootSectorPattern())
+	{
+		static int current_dspb = -1;
+		if (current_dspb != dspb || dspb == 10)
+		{
+			if (dspb != 10)
+			{
+				current_dspb = dspb;
+			}
+
+			switch (dspb)
+			{
+			case 10:
+				m_bootSectorPattern = 1 << 0;
+				break;
+
+			case 255:
+				if (m_bootSectorPattern == 0b0001)
+				{
+					m_bootSectorPattern |= 1 << 1;
+				}
+				break;
+			
+			default:
+				m_bootSectorPattern = 0;
+				break;
+			}
+
+			if (m_bootSectorPattern == 0b0011)
+			{
+				g_discImage.set_skip_bootsector(true);
+				DEBUG_PRINT("BOOTSECTOR PATTERN\n");
+				return;
+			}
+		}
+	}
+}
 
 bool __time_critical_func(picostation::MechCommand::getSens)(const size_t what) const { return m_sensData[what]; }
 
