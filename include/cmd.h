@@ -23,10 +23,10 @@ class MechCommand {
 	void resetCLVModeStopKickPattern() { m_clvModeStopKickPattern = 0; }	
 	void setFirstClvModeStopKickPattern(bool value) { m_firstClvModeStopKickPattern = value; }
 	bool isCLVModeStopKickPattern();
-	void setBootSectorPattern(const uint8_t mode);
+	void setBootSectorPattern(const uint8_t value);
 	uint8_t getBootSectorPattern() { return m_bootSectorPattern; }
 	void resetBootSectorPattern() { m_bootSectorPattern = 0; }
-	bool isBootSectorPattern() { return  (m_bootSectorPattern == 0b0011); }
+	bool isBootSectorPattern() { return  (m_bootSectorPattern == 0b0111); }
 
   private:
 	enum MECH_COMMAND

@@ -335,18 +335,26 @@ bool __time_critical_func(picostation::MechCommand::isCLVModeStopKickPattern)()
 	return false;
 }
 
-void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8_t dspb)
+void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8_t value)
 {
 	if (!isBootSectorPattern())
 	{
-		static int current_dspb = -1;
-		if (current_dspb != dspb || dspb == 10)
+		static int current_value = -1;
+		if (current_value != value || value == 10)
 		{
-			current_dspb = dspb;
-			switch (dspb)
+			current_value = value;
+			switch (value)
 			{
 			case 10:
-				m_bootSectorPattern = 1 << 0;
+				if (m_bootSectorPattern == 0b0011)
+				{
+					m_bootSectorPattern |= 1 << 2;
+				}
+				else
+				{
+					m_bootSectorPattern = 1 << 0;	
+				}
+
 				break;
 
 			case 255:
@@ -361,7 +369,7 @@ void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8
 				break;
 			}
 
-			if (m_bootSectorPattern == 0b0011)
+			if (m_bootSectorPattern == 0b0111)
 			{
 				g_discImage.set_skip_bootsector(true);
 				DEBUG_PRINT("BOOTSECTOR PATTERN\n");
