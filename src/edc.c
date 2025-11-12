@@ -121,7 +121,6 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
     //
     // Generate sync
     //
-    uint8_t edc[4] = {0};
     memmove(sector, sync_header, sizeof(sync_header));
     switch (sector[0x0F]) {
         case 0x00:
@@ -157,6 +156,8 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
             memmove(sector + 0x14, sector + 0x10, 4);
 
             if (!(sector[0x12] & 0x20)) {
+                uint8_t edc[4] = {0};
+                
                 //
                 // Form 1: Compute EDC
                 //
@@ -176,12 +177,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 2: Compute EDC
                 //
-                edc_computeblock(sector + 0x10, 0x91C, edc);
-
-                if (memcmp(edc, sector + 0x92C, 4) != 0)
-                {
-				    memcpy(sector + 0x92C, edc, 4);
-                }
+                edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
             }
             break;
     }
