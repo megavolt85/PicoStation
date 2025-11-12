@@ -40,22 +40,17 @@ inline void set32lsb(uint8_t* p, uint32_t value) {
 //
 // Compute EDC for a block
 //
-void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uint8_t* dest, uint8_t mode) {
+void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uint8_t* dest) {
     uint32_t edc = 0;
-    bool all_zero = true;
     size_t index = 0;
     
     while (size--) {
         uint8_t val = *src++;
-
-        // Skip the first 8 bytes of the subheader
-        if (mode == 2 && index >= 8 && val != 0) all_zero = false;
         edc = (edc >> 8) ^ edc_lut[(edc ^ val) & 0xFF];
         index++;
     }
     
-    if (!all_zero)
-        set32lsb(dest, edc);
+    set32lsb(dest, edc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +121,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
     //
     // Generate sync
     //
+    uint8_t edc[4] = {0};
     memmove(sector, sync_header, sizeof(sync_header));
     switch (sector[0x0F]) {
         case 0x00:
@@ -141,7 +137,7 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
             //
             // Compute EDC
             //
-            edc_computeblock(sector + 0x00, 0x810, sector + 0x810, sector[0x0F]);
+            edc_computeblock(sector + 0x00, 0x810, sector + 0x810);
             //
             // Zero out reserved area
             //
@@ -164,17 +160,28 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 1: Compute EDC
                 //
-                edc_computeblock(sector + 0x10, 0x808, sector + 0x818, sector[0x0F]);
-                //
-                // Generate ECC P/Q codes
-                //
-                ecc_generate(sector, 1);
+                edc_computeblock(sector + 0x10, 0x808, edc);
+
+                if (memcmp(edc, sector + 0x818, 4) != 0)
+                {
+                    memcpy(sector + 0x818, edc, 4);
+                    
+                    //
+                    // Generate ECC P/Q codes
+                    //
+                    ecc_generate(sector, 1);
+                }
 
             } else {
                 //
                 // Form 2: Compute EDC
                 //
-				edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C, sector[0x0F]);
+                edc_computeblock(sector + 0x10, 0x91C, edc);
+
+                if (memcmp(edc, sector + 0x92C, 4) != 0)
+                {
+				    memcpy(sector + 0x92C, edc, 4);
+                }
             }
             break;
     }
