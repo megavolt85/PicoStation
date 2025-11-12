@@ -540,7 +540,7 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
 		return;
 	}
 
-    if (adjustedSector < 0)
+    if (adjustedSector < 0 || (skip_bootsector && adjustedSector > 11 && adjustedSector < 16))
 	{
 		if (m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 		{
