@@ -79,6 +79,7 @@ void picostation::ModChip::sendLicenseString(const int sector, MechCommand &mech
                 }
 
                 endLicenseSequence();
+                mechCommand.setBootSectorPattern(255);
             }
         }
     } else {

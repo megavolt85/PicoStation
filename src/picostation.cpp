@@ -407,6 +407,7 @@ void __time_critical_func(picostation::reset)()
 			g_discImage.set_skip_bootsector(false);
 			g_discImage.set_skip_edc(false);
             m_mechCommand.setFirstClvModeStopKickPattern(true);
+            m_mechCommand.resetBootSectorPattern();
 		}
 		picostation::DirectoryListing::gotoRoot();
 		s_dataLocation = picostation::DiscImage::DataLocation::RAM;
@@ -420,7 +421,9 @@ void __time_critical_func(picostation::reset)()
     gpio_put(Pin::SQSO, 0);
 	g_driveMechanics.resetDrive();
 	m_i2s.reinitI2S();
+    g_discImage.set_skip_bootsector(false);
     m_mechCommand.setFirstClvModeStopKickPattern(true);
+    m_mechCommand.resetBootSectorPattern();
 	
 	uint64_t startTime = time_us_64();
 	

@@ -453,7 +453,7 @@ void __time_critical_func(picostation::DiscImage::unload)()
 				m_cueDisc.tracks[i].file->close(m_cueDisc.tracks[i].file, NULL, NULL);
 			}
 		}
-	}
+	}    
 }
 
 void __time_critical_func(picostation::DiscImage::makeDummyCue)()
@@ -532,15 +532,15 @@ void __time_critical_func(picostation::DiscImage::readSectorSD)(void *buffer, co
 	UINT br = 0;
 	size_t i;
 
-	const int adjustedSector = sector - c_preGap;    
-	
-	if (!skip_bootsector && adjustedSector < 16 && adjustedSector >= 0 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
+	const int adjustedSector = sector - c_preGap;
+    
+    if (!skip_bootsector && adjustedSector >= 0 && adjustedSector < 5 && m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 	{
 		scramble_data((uint32_t *) buffer, (uint16_t *) &loaderImage[adjustedSector * 2352], scramling, 1176);
 		return;
 	}
-    
-    if (adjustedSector < 0)
+
+    if (adjustedSector < 0 || (skip_bootsector && adjustedSector > 11 && adjustedSector < 16))
 	{
 		if (m_cueDisc.tracks[1].trackType == CueTrackType::TRACK_TYPE_DATA)
 		{
