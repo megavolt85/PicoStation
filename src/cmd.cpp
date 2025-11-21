@@ -269,12 +269,10 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 		}
 		
 		default:
-		{
-			if (command.cmd.id != 0x1 && command.cmd.id != 0x3 && command.cmd.id != 0x5 && command.cmd.id != 0x6)
+			if (!((1 << command.cmd.id) & 0x6A))
 			{
 				setBootSectorPattern(command.cmd.id);
 			}
-		}
 			break;
 	}
 }

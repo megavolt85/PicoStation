@@ -45,8 +45,7 @@ void __time_critical_func(edc_computeblock)(const uint8_t* src, size_t size, uin
     size_t index = 0;
     
     while (size--) {
-        uint8_t val = *src++;
-        edc = (edc >> 8) ^ edc_lut[(edc ^ val) & 0xFF];
+        edc = (edc >> 8) ^ edc_lut[(edc ^ (*src++)) & 0xFF];
         index++;
     }
     
