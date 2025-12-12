@@ -274,10 +274,16 @@ void __time_critical_func(picostation::initHW)()
     gpio_set_dir(Pin::CMD_CK, GPIO_IN);
     gpio_set_dir(Pin::CMD_DATA, GPIO_IN);
 
-    gpio_set_input_hysteresis_enabled(Pin::XLAT, true);
-    gpio_set_input_hysteresis_enabled(Pin::SQCK, true);
-    gpio_set_input_hysteresis_enabled(Pin::RESET, true);
-    gpio_set_input_hysteresis_enabled(Pin::CMD_CK, true);
+    gpio_set_input_hysteresis_enabled(Pin::XLAT, false);
+    gpio_set_input_hysteresis_enabled(Pin::SQCK, false);
+    gpio_set_input_hysteresis_enabled(Pin::RESET, false);
+    gpio_set_input_hysteresis_enabled(Pin::CMD_CK, false);
+
+    gpio_set_drive_strength(Pin::SQSO, GPIO_DRIVE_STRENGTH_8MA); // SUBQ out drive +1
+    gpio_set_drive_strength(Pin::LRCK, GPIO_DRIVE_STRENGTH_8MA); // I2S word clock out drive +1
+    gpio_set_drive_strength(Pin::DA15, GPIO_DRIVE_STRENGTH_8MA); // I2S something drive +1
+    gpio_set_drive_strength(Pin::DA16, GPIO_DRIVE_STRENGTH_8MA); // I2S or other drive +1
+    gpio_set_drive_strength(Pin::CLK, GPIO_DRIVE_STRENGTH_12MA); // "APLL" drive +2
     
     i2c_init(i2c0, 400*1000);
 	gpio_set_function(Pin::EXP_I2C0_SDA, GPIO_FUNC_I2C);
