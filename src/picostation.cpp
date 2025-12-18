@@ -220,7 +220,7 @@ static void __time_critical_func(send_subq)(const int Sector)
                 g_driveMechanics.moveToNextSector();
                 g_subqDelay = true;
 
-                add_alarm_in_us(6667,
+                add_alarm_in_us(time_us_64() - m_i2s.getLastSectorTime() + c_MaxSubqDelayTime,
 					[](alarm_id_t id, void *user_data) -> int64_t {
 						send_subq((const int) user_data);
 						return 0;
