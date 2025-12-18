@@ -20,7 +20,7 @@
 
 void __time_critical_func(picostation::SubQ::start_subq)(const int sector)
 {
-    if (!g_driveMechanics.isSledStopped() || (g_driveMechanics.req_skip_subq() && g_driveMechanics.req_skip_subq() != sector))
+    if (!g_driveMechanics.isSledStopped() || g_driveMechanics.req_skip_subq())
 	{
 		g_driveMechanics.clear_skip_subq();
 		return;
