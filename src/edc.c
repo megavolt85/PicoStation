@@ -176,7 +176,25 @@ void __time_critical_func(eccedc_generate)(uint8_t* sector) {
                 //
                 // Form 2: Compute EDC
                 //
-                edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
+                switch(sector[0x12])
+                {
+                    case 0x20:
+                    {
+                        unsigned char empty[4] = {0, 0, 0, 0};
+                        unsigned char default_string[4] = {0x3F, 0x13, 0xB0, 0xBE}; // big-endian
+
+                        if (memcmp(&sector[2352 - 4], empty, 4) != 0
+                            && memcmp(&sector[2352 - 4], default_string, 4) != 0) 
+                        {
+                            edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
+                        }
+                        break;
+                    }
+                    
+                    default:
+                        edc_computeblock(sector + 0x10, 0x91C, sector + 0x92C);
+                        break;
+                }
             }
             break;
     }
