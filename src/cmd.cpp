@@ -369,8 +369,7 @@ void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8
 
 			if (m_bootSectorPattern == 0b0111)
 			{
-				// TODO: DISABLED, IT IS NECESSARY TO KNOW LONG START AND SHORT START TO ACTIVATE IT. 
-				// g_discImage.set_skip_bootsector(true); 
+				g_discImage.set_skip_bootsector(true); 
 				DEBUG_PRINT("BOOTSECTOR PATTERN\n");
 				return;
 			}
