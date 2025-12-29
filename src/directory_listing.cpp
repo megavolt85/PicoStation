@@ -27,12 +27,15 @@ namespace
     listingBuilder* fileListing;
 }  // namespace
 
+static FIL cover_fp;
 static FATFS s_fatFS;
 static bool sd_present = false;
 
 void __time_critical_func(DirectoryListing::init)()
 {
     sd_present = false;
+    
+    memset(&cover_fp, 0, sizeof(FIL));
     
     FRESULT fr = f_mount(&s_fatFS, "", 1);
 	
@@ -330,5 +333,63 @@ bool __time_critical_func(DirectoryListing::getDirectoryEntry)(const uint32_t in
     f_closedir(&dir);
     return false;
 }
+
+void __time_critical_func(DirectoryListing::openCover)(const uint32_t index)
+{
+    char filePath[c_maxFilePathLength + 1];
+    
+    if (cover_fp.obj.fs)
+	{
+		f_close(&cover_fp);
+	}
+	
+    if (!sd_present)
+    {
+		return;
+	}
+	
+    getPath(index, filePath);
+    
+    uint32_t len = strlen(filePath);
+    
+    if (filePath[len-4] == '.') // is cue file
+	{
+		strcpy(&filePath[len-4], ".cov");
+	}
+	else // is directory
+	{
+		strcat(filePath, ".cov");
+	}
+    
+	DEBUG_PRINT("openCover: %s\n", filePath);
+
+	f_open(&cover_fp, filePath, FA_READ);
+}
+
+uint16_t* __time_critical_func(DirectoryListing::readCover)(const uint32_t part)
+{
+	static uint16_t cover_buf[1162];
+	UINT readed;
+	
+	if (!cover_fp.obj.fs)
+	{
+		DEBUG_PRINT("readCover: not found\n");
+		cover_buf[0] = 'D' | 'E' << 8;
+		cover_buf[1] = 'A' | 'D' << 8;
+		return cover_buf;
+	}
+	
+	f_lseek(&cover_fp, part << 11);
+	
+	f_read(&cover_fp, &cover_buf[138], 2048, &readed);
+	cover_buf[0] = 'P' | 'A' << 8;
+	cover_buf[1] = 'R' | 'T' << 8;
+	cover_buf[2] = (uint16_t) part;
+	
+	DEBUG_PRINT("readCover: part %d\n", part);
+	
+	return cover_buf;
+}
+
 }  // namespace picostation
 

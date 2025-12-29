@@ -522,7 +522,7 @@ void __time_critical_func(picostation::DiscImage::readSectorRAM)(void *buffer, c
     } 
     else
     {
-        buildSector(sector, static_cast<uint32_t *>(buffer), s_userData, scramling);
+        buildSector(sector, static_cast<uint32_t *>(buffer), NULL, scramling, false);
     }
 }
 

@@ -89,7 +89,6 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 {
     picostation::ModChip modChip;
     static uint32_t pioSamples[CACHED_SECS][1176];
-    static uint32_t pioDummy[1176];
     static uint16_t *cdScramblingLUT = generateScramblingLUT();
 
     static uint8_t bufferForDMA = 1;
@@ -190,7 +189,6 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					menu_active = false;
 					reinitI2S();
 					g_driveMechanics.resetDrive();
-					mechCommand.setFirstClvModeStopKickPattern(true);
 					g_discImage.set_skip_bootsector(false);
 					mechCommand.resetBootSectorPattern();
 
@@ -203,6 +201,17 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					if (!listReadyState.Load())
 					{
 						picostation::DirectoryListing::getDirectoryEntries(g_entryOffset.Load());
+						listReadyState = 1;
+					}
+					break;
+				}
+				
+				case picostation::FileListingStates::GET_COVER:
+				{
+					if (!listReadyState.Load())
+					{
+						picostation::DirectoryListing::openCover(g_fileArg.Load());
+						needFileCheckAction = picostation::FileListingStates::PROCESS_FILES;
 						listReadyState = 1;
 					}
 					break;
@@ -254,13 +263,25 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 				++bufferForSDRead &= (CACHED_SECS-1);
 			}
 			
-			if (menu_active && needFileCheckAction.Load() == picostation::FileListingStates::PROCESS_FILES && listReadyState.Load() && currentSector == 4750)
+			if (menu_active && needFileCheckAction.Load() == picostation::FileListingStates::PROCESS_FILES && listReadyState.Load())
 			{
-				g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::getFileListingData(), cdScramblingLUT);
-				needFileCheckAction = picostation::FileListingStates::IDLE;
+				if (currentSector == 4750)
+				{
+					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::getFileListingData(), cdScramblingLUT);
+					needFileCheckAction = picostation::FileListingStates::IDLE;
+				}
+				else if (currentSector >= 4850 && currentSector < 4866)
+				{
+					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::readCover(currentSector-4850), cdScramblingLUT);
+				}
+				else
+				{
+					goto not_menu_request;
+				}
 			}
 			else
 			{
+not_menu_request:
 #if DEBUG_I2S
 				startTime = time_us_64();
 #endif

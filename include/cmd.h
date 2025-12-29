@@ -18,11 +18,6 @@ class MechCommand {
     void processLatchedCommand();
     void updateMech();
     void resetXBUSY();
-	void setCLVModeStopKickPattern(const uint8_t clv_mode);
-	uint8_t getCLVModeStopKickPattern() { return m_clvModeStopKickPattern; }
-	void resetCLVModeStopKickPattern() { m_clvModeStopKickPattern = 0; }	
-	void setFirstClvModeStopKickPattern(bool value) { m_firstClvModeStopKickPattern = value; }
-	bool isCLVModeStopKickPattern();
 	void setBootSectorPattern(const uint8_t value);
 	uint8_t getBootSectorPattern() { return m_bootSectorPattern; }
 	void resetBootSectorPattern() { m_bootSectorPattern = 0; }
@@ -90,6 +85,7 @@ class MechCommand {
 		COMMAND_IO_COMMAND = 0x6,
 		COMMAND_IO_DATA = 0x7,
 		COMMAND_EXTENDED = 0x8,
+		COMMAND_GET_COVER = 0x9,
 		COMMAND_BOOTLOADER = 0xA
 	};
 
@@ -178,8 +174,6 @@ class MechCommand {
 
     int m_jumpTrack = 0;
     uint32_t m_latched = 0;  // Command latch
-	uint8_t m_clvModeStopKickPattern = 0;
-	bool m_firstClvModeStopKickPattern = true;
 	uint8_t m_bootSectorPattern = 0;
 
     size_t m_currentSens = 0;

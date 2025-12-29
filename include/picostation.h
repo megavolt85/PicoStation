@@ -21,6 +21,7 @@ enum class FileListingStates {
     GET_NEXT_CONTENTS,
     MOUNT_FILE,
     PROCESS_FILES,
+    GET_COVER
 };
 
 extern pseudoatomic<FileListingStates> g_fileListingState;

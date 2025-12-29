@@ -167,7 +167,6 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 					setSens(SENS::XBUSY, false);
 					break;
 			}
-			setCLVModeStopKickPattern(command.clv_mode.mode);
 			break;
 		}
 		
@@ -233,16 +232,6 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 					DEBUG_PRINT("COMMAND_IO_DATA %x\n", command.custom_cmd.arg);
 					break;
 				}
-					
-				case COMMAND_BOOTLOADER:
-				{
-					if (command.custom_cmd.arg == 0xBEEF)
-					{
-						// Restart into bootloader
-						rom_reset_usb_boot_extra(Pin::LED, 0, false);
-					}
-					break;
-				}
 				
 				case COMMAND_EXTENDED:
 				{
@@ -262,6 +251,23 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 					break;
 				}
 				
+				case COMMAND_GET_COVER:
+				{
+					needFileCheckAction = FileListingStates::GET_COVER;
+					listReadyState = 0;
+					break;
+				}
+				
+				case COMMAND_BOOTLOADER:
+				{
+					if (command.custom_cmd.arg == 0xBEEF)
+					{
+						// Restart into bootloader
+						rom_reset_usb_boot_extra(Pin::LED, 0, false);
+					}
+					break;
+				}
+				
 				default:
 					break;
 			}
@@ -275,62 +281,6 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 			}
 			break;
 	}
-}
-
-void __time_critical_func(picostation::MechCommand::setCLVModeStopKickPattern) (uint8_t clv_mode)
-{
-	switch (clv_mode)
-	{
-	case CLV_MODE_STOP:
-		if (m_clvModeStopKickPattern == 0)
-		{
-			m_clvModeStopKickPattern |= 1 << 0;
-		}
-		else if (m_clvModeStopKickPattern == 0b0111)
-		{
-			m_clvModeStopKickPattern |= 1 << 3;
-		}
-		break;
-
-	case CLV_MODE_KICK:
-		if (m_clvModeStopKickPattern == 0b001)
-		{
-			m_clvModeStopKickPattern |= 1 << 1;
-		}
-		else if (m_clvModeStopKickPattern == 0b0011)
-		{
-			m_clvModeStopKickPattern |= 1 << 2;
-		}
-
-		break;
-	
-	default:
-		resetCLVModeStopKickPattern();
-		break;
-	}
-
-	if (isCLVModeStopKickPattern())
-	{
-		g_driveMechanics.setSector(-1, 1);
-		resetCLVModeStopKickPattern();
-	}
-	
-}
-
-bool __time_critical_func(picostation::MechCommand::isCLVModeStopKickPattern)()
-{ 
-	if (m_clvModeStopKickPattern == 0b1111)
-	{
-		if (!m_firstClvModeStopKickPattern)
-		{
-			DEBUG_PRINT("STOP_KICK PATTERN\n");
-			return true;
-		}
-		
-		setFirstClvModeStopKickPattern(false);
-	}
-
-	return false;
 }
 
 void __time_critical_func(picostation::MechCommand::setBootSectorPattern) (uint8_t value)

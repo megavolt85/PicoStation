@@ -406,7 +406,6 @@ void __time_critical_func(picostation::reset)()
 			m_i2s.menu_active = true;
 			g_discImage.set_skip_bootsector(false);
 			g_discImage.set_skip_edc(false);
-            m_mechCommand.setFirstClvModeStopKickPattern(true);
             m_mechCommand.resetBootSectorPattern();
 		}
 		picostation::DirectoryListing::gotoRoot();
@@ -422,7 +421,6 @@ void __time_critical_func(picostation::reset)()
 	g_driveMechanics.resetDrive();
 	m_i2s.reinitI2S();
     g_discImage.set_skip_bootsector(false);
-    m_mechCommand.setFirstClvModeStopKickPattern(true);
     m_mechCommand.resetBootSectorPattern();
 	
 	uint64_t startTime = time_us_64();
