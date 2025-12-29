@@ -279,6 +279,10 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 
 void __time_critical_func(picostation::MechCommand::setCLVModeStopKickPattern) (uint8_t clv_mode)
 {
+	// DISABLED: THE PROBLEM I WAS HAVING WAS SOLVED BY USING THE NEW ZONE 333000 AND ADJUSTING THE 999999
+	if (1 == 1)
+		return;
+		
 	switch (clv_mode)
 	{
 	case CLV_MODE_STOP:
