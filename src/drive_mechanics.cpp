@@ -50,8 +50,24 @@ void __time_critical_func(picostation::DriveMechanics::setSector)(uint32_t step,
             
             if(m_sector > c_sectorMax)
             {
+                static uint32_t last_sector_max = 0;
+                static uint8_t last_zone_max = 0;
+
+                if (!last_sector_max || last_sector_max != m_sector)
+                {
+                    last_sector_max = m_sector;
+                    for (last_zone_max = 0; last_zone_max <= ZONE_MAX; last_zone_max++)
+                    {
+                        if (zone[last_zone_max] > c_sectorMax)
+                        {
+                            last_zone_max--;
+                            break;
+                        }
+                    }
+                }
+
                 m_sector = c_sectorMax;
-                cur_zone = ZONE_MAX;
+                cur_zone = last_zone_max;
                 break;
             }
             
