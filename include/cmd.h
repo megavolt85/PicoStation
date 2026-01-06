@@ -92,7 +92,8 @@ class MechCommand {
 	enum EXTENDED_CMD
 	{
 		EXTENDED_SKIP_BOOTSECTOR = 1,
-		EXTENDED_SKIP_EDC = 2
+		EXTENDED_SKIP_EDC = 2,
+		EXTENDED_GET_CFG = 3
 	};
 
 	typedef union mech_cmd_t

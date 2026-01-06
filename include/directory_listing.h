@@ -17,6 +17,8 @@ class DirectoryListing {
 	static uint16_t* getFileListingData();
     static void openCover(const uint32_t index);
     static uint16_t *readCover(const uint32_t part);
+    static void openCfg(void);
+    static uint16_t *readCfg(void);
   private:
 	static void combinePaths(const char* filePath1, const char* filePath2, char* newPath);
 	static bool getDirectoryEntry(const uint32_t index, char* filePath);

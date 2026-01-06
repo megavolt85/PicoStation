@@ -28,6 +28,7 @@ namespace
 }  // namespace
 
 static FIL cover_fp;
+static FIL cfg_fp;
 static FATFS s_fatFS;
 static bool sd_present = false;
 
@@ -36,6 +37,7 @@ void __time_critical_func(DirectoryListing::init)()
     sd_present = false;
     
     memset(&cover_fp, 0, sizeof(FIL));
+    memset(&cfg_fp, 0, sizeof(FIL));
     
     FRESULT fr = f_mount(&s_fatFS, "", 1);
 	
@@ -389,6 +391,50 @@ uint16_t* __time_critical_func(DirectoryListing::readCover)(const uint32_t part)
 	DEBUG_PRINT("readCover: part %d\n", part);
 	
 	return cover_buf;
+}
+
+void __time_critical_func(DirectoryListing::openCfg)(void)
+{
+    if (cfg_fp.obj.fs)
+	{
+		f_close(&cfg_fp);
+	}
+	
+    if (!sd_present)
+    {
+		return;
+	}
+	
+	DEBUG_PRINT("openCfg\n");
+
+	f_open(&cfg_fp, "config.ini", FA_READ);
+}
+
+uint16_t* __time_critical_func(DirectoryListing::readCfg)(void)
+{
+	static uint16_t cfg_buf[1162];
+	UINT readed;
+	
+	memset(cfg_buf, 0, 2324);
+	
+	if (!cfg_fp.obj.fs)
+	{
+		DEBUG_PRINT("readCfg: not found\n");
+		cfg_buf[0] = 'D' | 'E' << 8;
+		cfg_buf[1] = 'A' | 'D' << 8;
+		return cfg_buf;
+	}
+	
+	f_lseek(&cfg_fp, 0);
+	
+	f_read(&cfg_fp, &cfg_buf[138], 2048, &readed);
+	cfg_buf[0] = 'C' | 'F' << 8;
+	cfg_buf[1] = 'G' | '1' << 8;
+	cfg_buf[2] = (uint16_t) readed;
+	
+	DEBUG_PRINT("readCfg: readed %d\n", readed);
+	
+	return cfg_buf;
 }
 
 }  // namespace picostation

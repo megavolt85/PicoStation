@@ -245,6 +245,11 @@ void __time_critical_func(picostation::MechCommand::processLatchedCommand)()
 							g_discImage.set_skip_edc(command.custom_cmd.arg & 1);
 							break;
 						
+						case EXTENDED_GET_CFG:
+							needFileCheckAction = FileListingStates::GET_CFG;
+							listReadyState = 0;
+							break;
+						
 						default:
 							break;
 					}

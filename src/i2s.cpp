@@ -217,6 +217,17 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					break;
 				}
 				
+				case picostation::FileListingStates::GET_CFG:
+				{
+					if (!listReadyState.Load())
+					{
+						picostation::DirectoryListing::openCfg();
+						needFileCheckAction = picostation::FileListingStates::PROCESS_FILES;
+						listReadyState = 1;
+					}
+					break;
+				}
+				
 				default:
 					break;
 			}
@@ -273,6 +284,10 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 				else if (currentSector >= 4850 && currentSector < 4866)
 				{
 					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::readCover(currentSector-4850), cdScramblingLUT);
+				}
+				else if (currentSector == 4800)
+				{
+					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::readCfg(), cdScramblingLUT);
 				}
 				else
 				{
