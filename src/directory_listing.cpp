@@ -381,9 +381,9 @@ uint16_t* __time_critical_func(DirectoryListing::readCover)(const uint32_t part)
 		return cover_buf;
 	}
 	
-	f_lseek(&cover_fp, part << 11);
+	f_lseek(&cover_fp, part * 2114);
 	
-	f_read(&cover_fp, &cover_buf[138], 2048, &readed);
+	f_read(&cover_fp, &cover_buf[3], 2114, &readed);
 	cover_buf[0] = 'P' | 'A' << 8;
 	cover_buf[1] = 'R' | 'T' << 8;
 	cover_buf[2] = (uint16_t) part;

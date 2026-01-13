@@ -281,7 +281,7 @@ int __time_critical_func(picostation::I2S::initDMA)(const volatile void *read_ad
 					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::getFileListingData(), cdScramblingLUT);
 					needFileCheckAction = picostation::FileListingStates::IDLE;
 				}
-				else if (currentSector >= 4850 && currentSector < 4866)
+				else if (currentSector >= 4850 && currentSector < 4858)
 				{
 					g_discImage.buildSector(currentSector - c_leadIn, pioSamples[bufferForSDRead], picostation::DirectoryListing::readCover(currentSector-4850), cdScramblingLUT);
 				}
